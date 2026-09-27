@@ -1,11 +1,22 @@
 const express = require('express');
+require('dotenv').config();
+
 const app = express();
 
-app.use(express.json()); // Parse JSON bodies
+app.use(express.json());
+
 
 let todos = [
-  { id: 1, task: 'Learn Node.js', completed: false },
-  { id: 2, task: 'Build CRUD API', completed: false },
+  {
+    id: 1,
+    task: 'Learn Node.js',
+    completed: false
+  },
+  {
+    id: 2,
+    task: 'Build CRUD API',
+    completed: false
+  }
 ];
 
 
@@ -18,6 +29,13 @@ app.get('/todos/active', (req, res) => {
   const activeTodos = todos.filter((todo) => !todo.completed);
 
   res.status(200).json(activeTodos);
+});
+
+
+app.get('/todos/completed', (req, res) => {
+  const completedTodos = todos.filter((todo) => todo.completed);
+
+  res.status(200).json(completedTodos);
 });
 
 
@@ -35,17 +53,18 @@ app.get('/todos/:id', (req, res) => {
   res.status(200).json(todo);
 });
 
+
 app.post('/todos', (req, res) => {
   const { task } = req.body;
 
-  // Validation
+  // Validation: task is required
   if (!task || task.trim() === '') {
     return res.status(400).json({
       error: 'The "task" field is required'
     });
   }
 
-  // Create a new ID
+  // Generate a new ID
   const newId =
     todos.length > 0
       ? Math.max(...todos.map((todo) => todo.id)) + 1
@@ -62,6 +81,7 @@ app.post('/todos', (req, res) => {
   res.status(201).json(newTodo);
 });
 
+
 app.patch('/todos/:id', (req, res) => {
   const id = parseInt(req.params.id);
 
@@ -77,6 +97,7 @@ app.patch('/todos/:id', (req, res) => {
 
   res.status(200).json(todo);
 });
+
 
 app.delete('/todos/:id', (req, res) => {
   const id = parseInt(req.params.id);
@@ -95,12 +116,6 @@ app.delete('/todos/:id', (req, res) => {
 });
 
 
-app.get('/todos/completed', (req, res) => {
-  const completedTodos = todos.filter((todo) => todo.completed);
-
-  res.status(200).json(completedTodos);
-});
-
 
 app.use((err, req, res, next) => {
   console.error(err);
@@ -111,7 +126,8 @@ app.use((err, req, res, next) => {
 });
 
 
-const PORT = 3002;
+
+const PORT = process.env.PORT || 3002;
 
 app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);
